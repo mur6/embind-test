@@ -38,11 +38,8 @@ emscripten::val convertMatToUint8Array(const cv::Mat &mat) {
     emscripten::val uint8Array = emscripten::val::global("Uint8Array").new_(length);
     emscripten::val memoryView = emscripten::val::global("Uint8Array").new_(emscripten::typed_memory_view(length, mat.data));
     uint8Array.call<void>("set", memoryView);
-
     return uint8Array;
 }
-
-
 
 cv::Mat _cropAndResizeImage(
     const cv::Mat &inputImage,
