@@ -40,4 +40,4 @@ string(APPEND CMAKE_EXE_LINKER_FLAGS " --preload-file ${CMAKE_SOURCE_DIR}/images
 #     SUFFIX ".html"
 # )
 
-# set(CMAKE_EXECUTABLE_SUFFIX ".html")
+set(CMAKE_EXECUTABLE_SUFFIX ".html")
