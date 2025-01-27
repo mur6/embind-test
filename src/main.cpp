@@ -87,12 +87,7 @@ EMSCRIPTEN_BINDINGS(my_module)
 int main() {
     EM_ASM({
         console.log("fs init");
-        // open /images/xx.jpg
-        // cropAndResizeImage
-        // save /images/xx_resized.jpg
         console.log("fs init done");
-        // FS.mount(MEMFS, {}, '/images');
-        // list files
         console.log(FS.readdir('/images'));
         FS.readdir('/images').forEach(function (file) {
             console.log(file);
