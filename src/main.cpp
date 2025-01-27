@@ -26,6 +26,16 @@ cv::Mat convertUint8ArrayToMat(emscripten::val uint8Array, int width, int height
     return outputMat;
 }
 
+// 4. C++のcv::MatからJavaScriptのUint8Arrayに変換
+emscripten::val convertMatToUint8Array(const cv::Mat &mat) {
+    // Create a Uint8Array with the same size as the Mat
+    size_t length = mat.total() * mat.elemSize();
+    std::vector<uint8_t> outputData(length);
+    std::memcpy(outputData.data(), mat.data, length);
+
+    return emscripten::val::global("Uint8Array").new_(emscripten::val::array(outputData));
+}
+
 #ifdef 0
 // 画像データを処理するメインメソッド
 emscripten::val js_cropAndResizeImage(
@@ -91,13 +101,24 @@ cv::Mat _cropAndResizeImage(
     return croppedImage;
 }
 
-emscripten::val js_cropAndResizeImage(
-    const emscripten::val &inputUint8ArrayOfRgba,
-    int inputWidth, int inputHeight,
-    int outputWidth, int outputHeight) {
-    cv::Mat inputImage = convertUint8ArrayToMat(inputUint8ArrayOfRgba, inputWidth, inputHeight);
-    cv::Mat croppedImage = _cropAndResizeImage(inputImage, inputWidth, inputHeight, outputWidth, outputHeight);
-    return convertMatToUint8Array(croppedImage);
+extern "C"
+{
+    // Function to capture the image from the camera
+    EMSCRIPTEN_KEEPALIVE
+    emscripten::val js_cropAndResizeImage(
+        const emscripten::val &inputUint8ArrayOfRgba,
+        int inputWidth, int inputHeight,
+        int outputWidth, int outputHeight) {
+        cv::Mat inputImage = convertUint8ArrayToMat(inputUint8ArrayOfRgba, inputWidth, inputHeight);
+        cv::Mat croppedImage = _cropAndResizeImage(inputImage, inputWidth, inputHeight, outputWidth, outputHeight);
+        return convertMatToUint8Array(croppedImage);
+    }
+}
+
+
+EMSCRIPTEN_BINDINGS(my_module)
+{
+    emscripten::function("cropAndResizeImage", &js_cropAndResizeImage);
 }
 
 int main() {
