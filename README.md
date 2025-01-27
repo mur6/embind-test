@@ -17,8 +17,11 @@ emscripten-opencv-project/
 
 ## ビルド手順
 
-1. 必要な依存関係のインストール:
+1. opencvのwasm版のビルド
 
+```sh
+sh build.sh opencv_build_wasm
+```
 
 
 
