@@ -4,7 +4,7 @@
 
 
 // 画像データを処理するメインメソッド
-emscripten::val cropAndResizeImage(
+emscripten::val js_cropAndResizeImage(
     const emscripten::val &inputUint8ArrayOfRgba,
     int inputWidth, int inputHeight,
     int outputWidth, int outputHeight) {
@@ -37,6 +37,37 @@ emscripten::val cropAndResizeImage(
 
     return emscripten::val::global("Uint8Array").new_(emscripten::val::array(outputData));
 }
+
+
+// 画像データを処理するメインメソッド
+cv::Mat _cropAndResizeImage(
+    const cv::Mat &inputImage,
+    int inputWidth, int inputHeight,
+    int outputWidth, int outputHeight) {
+
+    // 2. アスペクト比を維持しながらリサイズ
+    int scaledWidth, scaledHeight;
+    if (inputWidth * outputHeight > inputHeight * outputWidth) {
+        scaledWidth = outputWidth;
+        scaledHeight = inputHeight * outputWidth / inputWidth;
+    } else {
+        scaledHeight = outputHeight;
+        scaledWidth = inputWidth * outputHeight / inputHeight;
+    }
+
+    cv::Mat resizedImage;
+    cv::resize(inputImage, resizedImage, cv::Size(scaledWidth, scaledHeight));
+
+    // 3. 中央部分を切り出し
+    int x = (scaledWidth - outputWidth) / 2;
+    int y = (scaledHeight - outputHeight) / 2;
+    cv::Rect roi(x, y, outputWidth, outputHeight);
+    cv::Mat croppedImage = resizedImage(roi);
+
+    // 4. C++のcv::MatからJavaScriptのUint8Arrayに変換
+    return croppedImage;
+}
+
 
 EMSCRIPTEN_BINDINGS(module) {
     emscripten::function("resizeImage", &resizeImage);
