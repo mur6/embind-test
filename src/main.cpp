@@ -86,19 +86,26 @@ EMSCRIPTEN_BINDINGS(my_module)
 
 int main() {
     EM_ASM({
-        console.log("Hello, world!");
+        console.log("fs init");
         // open /images/xx.jpg
         // cropAndResizeImage
         // save /images/xx_resized.jpg
-        FS.mount(MEMFS, {}, '/images');
-        FS.readFile('/images/xx.jpg').then(function (data) {
+        console.log("fs init done");
+        // FS.mount(MEMFS, {}, '/images');
+        // list files
+        console.log(FS.readdir('/images'));
+        FS.readdir('/images').forEach(function (file) {
+            console.log(file);
+        });
+
+        FS.readFile('/images/bay.jpg').then(function (data) {
             var inputUint8ArrayOfRgba = new Uint8Array(data);
             var inputWidth = 1920;
             var inputHeight = 1080;
             var outputWidth = 640;
             var outputHeight = 360;
             var outputUint8ArrayOfRgba = Module.cropAndResizeImage(inputUint8ArrayOfRgba, inputWidth, inputHeight, outputWidth, outputHeight);
-            FS.writeFile('/images/xx_resized.jpg', outputUint8ArrayOfRgba);
+            FS.writeFile('/images/bay_resized.jpg', outputUint8ArrayOfRgba);
         });
     });
 }
