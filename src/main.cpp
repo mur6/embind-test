@@ -1,6 +1,30 @@
 #include <opencv2/opencv.hpp>
 #include <emscripten/bind.h>
 
+// Function to convert Uint8Array to cv::Mat
+cv::Mat convertUint8ArrayToMat(emscripten::val uint8Array, int width, int height) {
+    // Get the array length and data pointer
+    size_t length = uint8Array["length"].as<size_t>();
+    int channels = 4; // RGBA
+
+    // Create a Mat with the specified dimensions and channels
+    cv::Mat outputMat(height, width, CV_8UC(channels));
+
+    // Ensure the array size matches expected matrix size
+    if (length != static_cast<size_t>(width * height * channels)) {
+        throw std::runtime_error("Array size does not match specified dimensions");
+    }
+
+    // Copy data from JavaScript Uint8Array to cv::Mat
+    emscripten::val heapView = emscripten::val::global("Uint8Array").new_(
+        emscripten::typed_memory_view(length, outputMat.data)
+    );
+
+    // Set the Mat data from the Uint8Array
+    heapView.call<void>("set", uint8Array);
+
+    return outputMat;
+}
 
 #ifdef 0
 // 画像データを処理するメインメソッド
@@ -39,7 +63,6 @@ emscripten::val js_cropAndResizeImage(
 }
 #endif
 
-// 画像データを処理するメインメソッド
 cv::Mat _cropAndResizeImage(
     const cv::Mat &inputImage,
     int inputWidth, int inputHeight,
@@ -68,19 +91,30 @@ cv::Mat _cropAndResizeImage(
     return croppedImage;
 }
 
+emscripten::val js_cropAndResizeImage(
+    const emscripten::val &inputUint8ArrayOfRgba,
+    int inputWidth, int inputHeight,
+    int outputWidth, int outputHeight) {
+    cv::Mat inputImage = convertUint8ArrayToMat(inputUint8ArrayOfRgba, inputWidth, inputHeight);
+    cv::Mat croppedImage = _cropAndResizeImage(inputImage, inputWidth, inputHeight, outputWidth, outputHeight);
+    return convertMatToUint8Array(croppedImage);
+}
+
 int main() {
-    // 画像の読み込み
-    cv::Mat inputImage = cv::imread("input.jpg", cv::IMREAD_COLOR);
-    if (inputImage.empty()) {
-        std::cerr << "Failed to read image file." << std::endl;
-        return 1;
-    }
-
-    // 画像の処理
-    cv::Mat outputImage = _cropAndResizeImage(inputImage, inputImage.cols, inputImage.rows, 256, 256);
-
-    // 画像の保存
-    cv::imwrite("output.jpg", outputImage);
-
-    return 0;
+    EM_ASM({
+        console.log("Hello, world!");
+        // open /images/xx.jpg
+        // cropAndResizeImage
+        // save /images/xx_resized.jpg
+        FS.mount(MEMFS, {}, '/images');
+        FS.readFile('/images/xx.jpg').then(function (data) {
+            var inputUint8ArrayOfRgba = new Uint8Array(data);
+            var inputWidth = 1920;
+            var inputHeight = 1080;
+            var outputWidth = 640;
+            var outputHeight = 360;
+            var outputUint8ArrayOfRgba = Module.cropAndResizeImage(inputUint8ArrayOfRgba, inputWidth, inputHeight, outputWidth, outputHeight);
+            FS.writeFile('/images/xx_resized.jpg', outputUint8ArrayOfRgba);
+        });
+    });
 }
