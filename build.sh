@@ -10,8 +10,7 @@ build_em() {
 opencv_build_wasm() {
     cd opencv
     mkdir -p build
-    cd build
-
+    python3 ./platforms/js/build_js.py build --build_wasm
 }
 
 
