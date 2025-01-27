@@ -33,12 +33,13 @@ cv::Mat convertUint8ArrayToMat(emscripten::val uint8Array, int width, int height
 
 // 4. C++のcv::MatからJavaScriptのUint8Arrayに変換
 emscripten::val convertMatToUint8Array(const cv::Mat &mat) {
-    // Create a Uint8Array with the same size as the Mat
+    // 1. cv::MatをJavaScriptのUint8Arrayに変換
     size_t length = mat.total() * mat.elemSize();
-    std::vector<uint8_t> outputData(length);
-    std::memcpy(outputData.data(), mat.data, length);
+    emscripten::val uint8Array = emscripten::val::global("Uint8Array").new_(length);
+    emscripten::val memoryView = emscripten::val::global("Uint8Array").new_(emscripten::typed_memory_view(length, mat.data));
+    uint8Array.call<void>("set", memoryView);
 
-    return emscripten::val::global("Uint8Array").new_(emscripten::val::array(outputData));
+    return uint8Array;
 }
 
 
