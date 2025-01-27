@@ -23,19 +23,12 @@ emscripten-opencv-project/
 sh build.sh opencv_build_wasm
 ```
 
-
-
-2. プロジェクトのビルド:
+1. プロジェクトのビルド
 
 ```bash
-cd /path/to/emscripten-opencv-project
-mkdir build && cd build
-emcmake cmake ..
-emmake make
+sh build.sh build_em
 ```
 
 ## 注意点
-
-- OpenCVのパスは環境に合わせて調整してください
 - Emscriptenの環境設定が必要です
 - ウェブブラウザで実行する必要があります
