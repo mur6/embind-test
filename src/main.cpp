@@ -3,6 +3,8 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 #include <vector>
+#include <iostream>
+
 
 // Function to convert Uint8Array to cv::Mat
 cv::Mat convertUint8ArrayToMat(emscripten::val uint8Array, int width, int height) {
@@ -48,20 +50,24 @@ cv::Mat _cropAndResizeImage(
 
     // 2. アスペクト比を維持しながらリサイズ
     int scaledWidth, scaledHeight;
-    if (inputWidth * outputHeight > inputHeight * outputWidth) {
+    if (inputWidth * outputHeight < inputHeight * outputWidth) {
         scaledWidth = outputWidth;
         scaledHeight = inputHeight * outputWidth / inputWidth;
     } else {
         scaledHeight = outputHeight;
         scaledWidth = inputWidth * outputHeight / inputHeight;
     }
+    std::cout << "Scaled image size: scaledWidth=" << scaledWidth << std::endl;
+    std::cout << "Scaled image size: scaledHeight=" << scaledHeight << std::endl;
 
     cv::Mat resizedImage;
     cv::resize(inputImage, resizedImage, cv::Size(scaledWidth, scaledHeight));
+    std::cout << "Resized image size: " << resizedImage.size() << std::endl;
 
     // 3. 中央部分を切り出し
     int x = (scaledWidth - outputWidth) / 2;
     int y = (scaledHeight - outputHeight) / 2;
+    std::cout << "Cropping image at (" << x << ", " << y << ") with size " << outputWidth << "x" << outputHeight << std::endl;
     cv::Rect roi(x, y, outputWidth, outputHeight);
     cv::Mat croppedImage = resizedImage(roi);
 
@@ -112,6 +118,12 @@ int main() {
         const outputWidth = 720;
         const outputHeight = 1280;
         const croppedImage = Module.cropAndResizeImage(rgbaData, inputWidth, inputHeight, outputWidth, outputHeight);
+        console.log('Cropped Image:', croppedImage);
+        const outputCanvas = document.getElementById('canvas');
+        outputCanvas.width = outputWidth;
+        outputCanvas.height = outputHeight;
+        const outputCtx = outputCanvas.getContext('2d');
+        outputCtx.putImageData(new ImageData(new Uint8ClampedArray(croppedImage), outputWidth, outputHeight), 0, 0);
     });
         // document.body.appendChild(image);
 
