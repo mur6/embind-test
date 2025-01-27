@@ -12,8 +12,8 @@ set(OpenCV_DIR "opencv/build_js")
 find_package(OpenCV REQUIRED)
 
 # 実行可能なJavaScriptを作成
-add_executable(opencv_demo 
-    src/main.cpp 
+add_executable(opencv_sample_main
+    src/main.cpp
     src/image_processing.cpp
 )
 
