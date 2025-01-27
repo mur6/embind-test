@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(em-opencv-sample)
 
-# Emscriptenのツールチェインファイルを設定
-# set(CMAKE_TOOLCHAIN_FILE "$ENV{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake")
 set(CMAKE_BUILD_TYPE Debug)
 
 if (NOT EMSCRIPTEN)
@@ -13,7 +11,7 @@ endif()
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(OpenCV_DIR "opencv/build_js")
+set(OpenCV_DIR "opencv/build")
 find_package(OpenCV 4 REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})

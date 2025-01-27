@@ -17,13 +17,13 @@ opencv_build_wasm() {
 
 # switch by the first argument
 case $1 in
-    em)
+    build_em)
         build_em
         ;;
-    opencv)
+    opencv_build_wasm)
         opencv_build_wasm
         ;;
     *)
-        echo "Usage: $0 {em|opencv}"
+        echo "Usage: $0 {build_em|opencv_build_wasm}"
         exit 1
 esac
