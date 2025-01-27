@@ -92,15 +92,26 @@ int main() {
         FS.readdir('/images').forEach(function (file) {
             console.log(file);
         });
+        const uint8Array = FS.readFile('/images/bay.jpg', { encoding: 'binary' });
 
-        FS.readFile('/images/bay.jpg').then(function (data) {
-            var inputUint8ArrayOfRgba = new Uint8Array(data);
-            var inputWidth = 1920;
-            var inputHeight = 1080;
-            var outputWidth = 640;
-            var outputHeight = 360;
-            var outputUint8ArrayOfRgba = Module.cropAndResizeImage(inputUint8ArrayOfRgba, inputWidth, inputHeight, outputWidth, outputHeight);
-            FS.writeFile('/images/bay_resized.jpg', outputUint8ArrayOfRgba);
-        });
+        // image.src = URL.createObjectURL(new Blob([uint8Array]));
+        // JPEG画像をデコードするために、ブラウザのImageオブジェクトを使用する
+        const blob = new Blob([uint8Array], { type: 'image/jpeg' });
+        const image = await createImageBitmap(blob);
+        // document.body.appendChild(image);
+        const canvas = document.createElement('canvas');
+        const inputWidth = 2000;
+        const inputHeight = 1123;
+        canvas.width = imageWidth;
+        canvas.height = imageHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(image, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        console.log('ImageData:', imageData);
+        const rgbaData = imageData.data;
+        console.log('RGBA Data:', rgbaData);
+        const outputWidth = 720;
+        const outputHeight = 1280;
+        const croppedImage = Module.cropAndResizeImage(rgbaData, inputWidth, inputHeight, outputWidth, outputHeight);
     });
 }
