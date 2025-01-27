@@ -14,19 +14,18 @@ find_package(OpenCV REQUIRED)
 # 実行可能なJavaScriptを作成
 add_executable(opencv_sample_main
     src/main.cpp
-    src/image_processing.cpp
 )
 
 # OpenCVライブラリをリンク
-target_link_libraries(opencv_demo ${OpenCV_LIBS})
-target_include_directories(opencv_demo PRIVATE include ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(opencv_sample_main ${OpenCV_LIBS})
+target_include_directories(opencv_sample_main PRIVATE include ${OpenCV_INCLUDE_DIRS})
 
 # Emscriptenフラグを設定
 set(EMSCRIPTEN_LINK_FLAGS
     "-s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s EXIT_RUNTIME=0 -s EXPORTED_FUNCTIONS='[\"_main\"]' -s EXPORTED_RUNTIME_METHODS='[\"cwrap\"]' --preload-file ${CMAKE_SOURCE_DIR}/assets"
 )
 
-set_target_properties(opencv_demo PROPERTIES
+set_target_properties(opencv_sample_main PROPERTIES
     LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}"
     SUFFIX ".html"
 )
