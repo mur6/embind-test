@@ -7,6 +7,102 @@
 
 #include "resize_by_opencv.hpp"
 
+
+
+// JavaScriptの配列をC++のvectorに変換
+std::vector<unsigned char> convertJSArrayToVector(const emscripten::val &jsArray)
+{
+    const auto length = jsArray["length"].as<unsigned>();
+    std::vector<unsigned char> result(length);
+
+    emscripten::val memory = emscripten::val::module_property("HEAPU8");
+    emscripten::val memoryView = jsArray["constructor"].new_(memory["buffer"]);
+
+    for (unsigned i = 0; i < length; ++i)
+    {
+        result[i] = jsArray[i].as<unsigned char>();
+    }
+
+    return result;
+}
+
+// C++のvectorをJavaScript配列に変換
+emscripten::val convertVectorToJSArray(const std::vector<unsigned char> &vec)
+{
+    emscripten::val Uint8Array = emscripten::val::global("Uint8Array");
+    emscripten::val result = Uint8Array.new_(vec.size());
+
+    for (size_t i = 0; i < vec.size(); ++i)
+    {
+        result.set(i, vec[i]);
+    }
+
+    return result;
+}
+
+// 切り出しサイズを計算
+void calculateCropDimensions(int inputWidth, int inputHeight,
+                             double targetAspectRatio,
+                             int &cropWidth, int &cropHeight)
+{
+    if (static_cast<double>(inputWidth) / inputHeight > targetAspectRatio)
+    {
+        // 入力画像が横長の場合
+        cropHeight = inputHeight;
+        cropWidth = static_cast<int>(inputHeight * targetAspectRatio);
+    }
+    else
+    {
+        // 入力画像が縦長の場合
+        cropWidth = inputWidth;
+        cropHeight = static_cast<int>(inputWidth / targetAspectRatio);
+    }
+}
+
+// 画像の切り出しとリサイズを行う
+std::vector<unsigned char> cropAndResizeBilinear(
+    const std::vector<unsigned char> &input,
+    int inputWidth, int inputHeight,
+    int startX, int startY,
+    int cropWidth, int cropHeight,
+    int targetWidth, int targetHeight)
+{
+
+    std::vector<unsigned char> result(targetWidth * targetHeight * 4);
+
+    for (int y = 0; y < targetHeight; ++y)
+    {
+        for (int x = 0; x < targetWidth; ++x)
+        {
+            // ソース画像での位置を計算
+            float srcX = startX + (x * static_cast<float>(cropWidth) / targetWidth);
+            float srcY = startY + (y * static_cast<float>(cropHeight) / targetHeight);
+
+            // バイリニア補間で色を計算
+            int x1 = static_cast<int>(srcX);
+            int y1 = static_cast<int>(srcY);
+            int x2 = std::min(x1 + 1, inputWidth - 1);
+            int y2 = std::min(y1 + 1, inputHeight - 1);
+
+            float xWeight = srcX - x1;
+            float yWeight = srcY - y1;
+
+            for (int c = 0; c < 4; ++c)
+            {
+                float val =
+                    (1 - xWeight) * (1 - yWeight) * input[(y1 * inputWidth + x1) * 4 + c] +
+                    xWeight * (1 - yWeight) * input[(y1 * inputWidth + x2) * 4 + c] +
+                    (1 - xWeight) * yWeight * input[(y2 * inputWidth + x1) * 4 + c] +
+                    xWeight * yWeight * input[(y2 * inputWidth + x2) * 4 + c];
+
+                result[(y * targetWidth + x) * 4 + c] = static_cast<unsigned char>(val);
+            }
+        }
+    }
+
+    return result;
+}
+
 // 画像データのりサイズ/クロップ処理: シンプルバージョン
 emscripten::val simple_cropAndResizeImage(
     const emscripten::val &inputData,
@@ -47,7 +143,7 @@ emscripten::val simple_cropAndResizeImage(
 
 EMSCRIPTEN_BINDINGS(my_module)
 {
-    emscripten::function("cropAndResizeImage", &cv_cropAndResizeImage);
+    emscripten::function("cropAndResizeImage", &simple_cropAndResizeImage);
 }
 
 int main() {
