@@ -2,7 +2,7 @@
 #include <emscripten/bind.h>
 
 
-
+#ifdef 0
 // 画像データを処理するメインメソッド
 emscripten::val js_cropAndResizeImage(
     const emscripten::val &inputUint8ArrayOfRgba,
@@ -37,7 +37,7 @@ emscripten::val js_cropAndResizeImage(
 
     return emscripten::val::global("Uint8Array").new_(emscripten::val::array(outputData));
 }
-
+#endif
 
 // 画像データを処理するメインメソッド
 cv::Mat _cropAndResizeImage(
@@ -68,8 +68,19 @@ cv::Mat _cropAndResizeImage(
     return croppedImage;
 }
 
+int main() {
+    // 画像の読み込み
+    cv::Mat inputImage = cv::imread("input.jpg", cv::IMREAD_COLOR);
+    if (inputImage.empty()) {
+        std::cerr << "Failed to read image file." << std::endl;
+        return 1;
+    }
 
-EMSCRIPTEN_BINDINGS(module) {
-    emscripten::function("resizeImage", &resizeImage);
-    emscripten::class_<cv::Mat>("Mat");
+    // 画像の処理
+    cv::Mat outputImage = _cropAndResizeImage(inputImage, inputImage.cols, inputImage.rows, 256, 256);
+
+    // 画像の保存
+    cv::imwrite("output.jpg", outputImage);
+
+    return 0;
 }
