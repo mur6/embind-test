@@ -32,8 +32,9 @@ string(APPEND EMSCRIPTEN_LINK_FLAGS " -s MODULARIZE=1")
 string(APPEND EMSCRIPTEN_LINK_FLAGS " -s EXPORT_ES6=1")
 string(APPEND EMSCRIPTEN_LINK_FLAGS " --bind")
 
-# set_target_properties(opencv_sample_main PROPERTIES
-#     LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}"
-#     SUFFIX ".html"
-# )
+set_target_properties(${TARGET_NAME} PROPERTIES
+    LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}"
+    SUFFIX ".html"
+)
 
+# set(CMAKE_EXECUTABLE_SUFFIX ".html")
