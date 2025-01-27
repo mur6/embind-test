@@ -3,12 +3,13 @@
 BUILD_DIR=build
 
 build_em() {
+    rm -rf $BUILD_DIR
     emcmake cmake -B $BUILD_DIR -S . -DCMAKE_BUILD_TYPE=Release
     cmake --build $BUILD_DIR
 }
 
 opencv_build_wasm() {
-    cd opencv
+    cd opencv || exit
     mkdir -p build
     emcmake python3 ./platforms/js/build_js.py build --build_wasm
 }
