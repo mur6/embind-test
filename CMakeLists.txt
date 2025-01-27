@@ -35,7 +35,8 @@ string(APPEND CMAKE_EXE_LINKER_FLAGS " -s MODULARIZE=1")
 string(APPEND CMAKE_EXE_LINKER_FLAGS " -s EXPORT_ES6=1")
 string(APPEND CMAKE_EXE_LINKER_FLAGS " --bind")
 string(APPEND CMAKE_EXE_LINKER_FLAGS " --preload-file ${CMAKE_SOURCE_DIR}/images@/images")
-string(APPEND CMAKE_EXE_LINKER_FLAGS " --use-preload-plugins")
+# string(APPEND CMAKE_EXE_LINKER_FLAGS " --use-preload-plugins")
+string(APPEND CMAKE_EXE_LINKER_FLAGS " -fwasm-exceptions")
 # set_target_properties(${TARGET_NAME} PROPERTIES
 #     LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}"
 #     SUFFIX ".html"

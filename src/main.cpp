@@ -97,15 +97,14 @@ int main() {
         // image.src = URL.createObjectURL(new Blob([uint8Array]));
         // JPEG画像をデコードするために、ブラウザのImageオブジェクトを使用する
         const blob = new Blob([uint8Array], { type: 'image/jpeg' });
-        const image = await createImageBitmap(blob);
-        // document.body.appendChild(image);
+        createImageBitmap(blob).then((imageBitmap) => {
         const canvas = document.createElement('canvas');
         const inputWidth = 2000;
         const inputHeight = 1123;
-        canvas.width = imageWidth;
-        canvas.height = imageHeight;
+        canvas.width = inputWidth;
+        canvas.height = inputHeight;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(image, 0, 0);
+        ctx.drawImage(imageBitmap, 0, 0);
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         console.log('ImageData:', imageData);
         const rgbaData = imageData.data;
@@ -113,5 +112,8 @@ int main() {
         const outputWidth = 720;
         const outputHeight = 1280;
         const croppedImage = Module.cropAndResizeImage(rgbaData, inputWidth, inputHeight, outputWidth, outputHeight);
+    });
+        // document.body.appendChild(image);
+
     });
 }
