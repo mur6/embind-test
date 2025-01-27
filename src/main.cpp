@@ -7,6 +7,43 @@
 
 #include "resize_by_opencv.hpp"
 
+// 画像データのりサイズ/クロップ処理: シンプルバージョン
+emscripten::val simple_cropAndResizeImage(
+    const emscripten::val &inputData,
+    int inputWidth, int inputHeight,
+    int outputWidth, int outputHeight)
+{
+    // debug input size, output size
+    std::cout << "inputWidth: " << inputWidth << std::endl;
+    std::cout << "inputHeight: " << inputHeight << std::endl;
+    std::cout << "outputWidth: " << outputWidth << std::endl;
+    std::cout << "outputHeight: " << outputHeight << std::endl;
+
+    // 入力データをC++のvectorに変換
+    std::vector<unsigned char> imageData = convertJSArrayToVector(inputData);
+
+    // 目標のアスペクト比を計算
+    const double targetAspectRatio = static_cast<double>(outputWidth) / outputHeight;
+
+    // 切り出すサイズを計算
+    int cropWidth, cropHeight;
+    calculateCropDimensions(inputWidth, inputHeight, targetAspectRatio,
+                            cropWidth, cropHeight);
+
+    // 切り出し開始位置を計算（中央に配置）
+    int startX = (inputWidth - cropWidth) / 2;
+    int startY = (inputHeight - cropHeight) / 2;
+
+    // 画像を切り出してリサイズ
+    std::vector<unsigned char> croppedData = cropAndResizeBilinear(
+        imageData, inputWidth, inputHeight,
+        startX, startY, cropWidth, cropHeight,
+        outputWidth, outputHeight);
+    // std::cout << "croppedData[0]: " << croppedData[0] << std::endl;
+    // 結果をJavaScript側に返す
+    return convertVectorToJSArray(croppedData);
+}
+
 
 EMSCRIPTEN_BINDINGS(my_module)
 {
