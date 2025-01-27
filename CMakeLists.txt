@@ -18,6 +18,7 @@ set(TARGET_NAME  "opencv_sample_main")
 # include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(${TARGET_NAME}
     src/main.cpp
+    src/resize_by_opencv.cpp
 )
 
 target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
