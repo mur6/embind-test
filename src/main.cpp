@@ -75,14 +75,14 @@ cv::Mat _cropAndResizeImage(
     return croppedImage;
 }
 
-    emscripten::val js_cropAndResizeImage(
-        const emscripten::val &inputUint8ArrayOfRgba,
-        int inputWidth, int inputHeight,
-        int outputWidth, int outputHeight) {
-        cv::Mat inputImage = convertUint8ArrayToMat(inputUint8ArrayOfRgba, inputWidth, inputHeight);
-        cv::Mat croppedImage = _cropAndResizeImage(inputImage, inputWidth, inputHeight, outputWidth, outputHeight);
-        return convertMatToUint8Array(croppedImage);
-    }
+emscripten::val js_cropAndResizeImage(
+    const emscripten::val &inputUint8ArrayOfRgba,
+    int inputWidth, int inputHeight,
+    int outputWidth, int outputHeight) {
+    cv::Mat inputImage = convertUint8ArrayToMat(inputUint8ArrayOfRgba, inputWidth, inputHeight);
+    cv::Mat croppedImage = _cropAndResizeImage(inputImage, inputWidth, inputHeight, outputWidth, outputHeight);
+    return convertMatToUint8Array(croppedImage);
+}
 
 
 EMSCRIPTEN_BINDINGS(my_module)
