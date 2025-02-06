@@ -2,6 +2,9 @@
 
 BUILD_DIR=build
 
+# activate emsdk
+source $EMSDK_ENV_PATH/emsdk_env.sh
+
 build_em() {
     rm -rf $BUILD_DIR
     emcmake cmake -B $BUILD_DIR -S . -DCMAKE_BUILD_TYPE=Release
